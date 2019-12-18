@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Reproductor</title>
+    <script src="./cdn/jquery.js"></script>
+    <style>
+      @font-face {
+        font-family: "001";
+        src: url(fonts/001.ttf);
+      }
+
+      @font-face {
+        font-family: "002";
+        src: url(fonts/002.ttf);
+      }
+
+      @font-face {
+        font-family: "003";
+        src: url(fonts/003.ttf);
+      }
+
+      @font-face {
+        font-family: "004";
+        src: url(fonts/004.ttf);
+      }
+
+      @font-face {
+        font-family: "005";
+        src: url(fonts/005.ttf);
+      }
+
+      @font-face {
+        font-family: "006";
+        src: url(fonts/006.ttf);
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .title {
+        margin-top: 70px;
+        text-align: center;
+        font-family: "001";
+      }
+      .radio {
+        color: black;
+        margin-right: 8px;
+      }
+      .emisora {
+        color: brown;
+      }
+      .play {
+        color: yellow;
+        text-align: center;
+        padding-top: 10px;
+        font-size: 29px;
+        background-color: green;
+        width: 120px;
+        height: 100px;
+        -moz-border-radius: 50%;
+        -webkit-border-radius: 50%;
+        border-radius: 50%;
+        position: absolute;
+        top: 35%;
+        left: 34%;
+        font-family: "002";
+        outline: none;
+      }
+
+      .title2 {
+        position: absolute;
+        top: 245px;
+        left: 30%;
+        font-size: 15px;
+        text-align: center;
+      }
+      .time2 {
+        font-family: "005";
+      }
+      .time {
+        font-family: "002";
+      }
+      .puntos {
+        color: green;
+      }
+      #currentTime {
+        font-family: "005";
+      }
+      #total {
+        font-family: "005";
+      }
+      #timeleft {
+        font-family: "005";
+      }
+
+      /* SLIDER */
+      .slidecontainer {
+        position: absolute;
+        width: 135px;
+        height: 50px;
+        left: 63%;
+        top: 42%;
+        transform: rotate(-90deg);
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+      }
+      .slider2 {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 50px;
+        background: blue;
+        outline: none;
+      }
+
+      .slider2::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 50px;
+        background: red;
+        cursor: pointer;
+      }
+
+      .slider2::-moz-range-thumb {
+        width: 25px;
+        height: 50px;
+        background: red;
+        cursor: pointer;
+      }
+
+      #demo {
+        position: absolute;
+        background-color: black;
+        color: white;
+        height: 50px;
+        width: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        left: 75%;
+        top: 63%;
+        font-family: "001";
+      }
+
+      .contenedor {
+        position: absolute;
+        width: 135px;
+        height: 50px;
+        top: 42%;
+        transform: rotate(-90deg);
+        -webkit-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg);
+      }
+      .barrita {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 50px;
+        border-radius: 0px;
+        background: purple;
+        outline: none;
+      }
+
+      .barrita::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 30px;
+        height: 50px;
+        border-radius: 50%;
+        background: black;
+        cursor: pointer;
+      }
+
+      .barrita::-moz-range-thumb {
+        width: 30px;
+        height: 50px;
+        border-radius: 50%;
+        background: black;
+        cursor: pointer;
+      }
+      #text {
+        background-color: black;
+        color: white;
+        height: 50px;
+        width: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        left: 12%;
+        top: 63%;
+        font-family: "002";
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="fondoGeometrico" id="fondoGeometrico">
+        <audio id="music" preload="true" src="./001.ogg"></audio>
+        <h1 class="title">
+          <span class="radio">Radio</span><span class="emisora">Arizona</span>
+        </h1>
+        <div>
+          <button class="play" id="pButton">PLAY</button>
+        </div>
+        <h3 class="title2">
+          <div id="timers">
+            <span id="currentTime"></span>
+            <span id="total"></span>
+            <span id="timeleft"></span>
+          </div>
+        </h3>
+        <div class="slidecontainer" id="sliderContainer">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            class="slider2"
+            id="myRange"
+          />
+        </div>
+        <p id="demo"></p>
+
+        <div class="contenedor">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            class="barrita"
+            id="barrita"
+            oninput="SetVolume(this.value)" onchange="SetVolume(this.value)"
+          />
+        </div>
+        <p id="text"></p>
+      </div>
+    </div>
+
+    <script>
+      let fondoGeometrico = document.getElementById("fondoGeometrico");
+      let fondo = 3; //cambiar los fondos 2 = cuadrado ; 1 = hexagono ; 3 = octagono.
+      if (fondo === 1) {
+        $(".fondoGeometrico").css({
+          "clip-path":
+            "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
+        });
+        fondoGeometrico.style.background = "aliceblue";
+        fondoGeometrico.style.position = "relative";
+        fondoGeometrico.style.width = "370px";
+        fondoGeometrico.style.height = "350px";
+      } else if (fondo === 2) {
+        $(".fondoGeometrico").css({
+          "clip-path":
+            "polygon(0% 15%, 15% 15%, 15% 0%, 85% 0%, 85% 15%, 100% 15%, 100% 85%, 85% 85%, 85% 100%, 15% 100%, 15% 85%, 0% 85%)"
+        });
+        fondoGeometrico.style.background = "#F6B507 ";
+        fondoGeometrico.style.position = "relative";
+        fondoGeometrico.style.width = "370px";
+        fondoGeometrico.style.height = "350px";
+      } else if (fondo === 3) {
+        $(".fondoGeometrico").css({
+          "clip-path":
+            "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)"
+        });
+        fondoGeometrico.style.background = "#05EBE8 ";
+        fondoGeometrico.style.position = "relative";
+        fondoGeometrico.style.width = "370px";
+        fondoGeometrico.style.height = "350px";
+      }
+
+      var playOrPause = document.getElementById("pButton");
+
+      playOrPause.addEventListener("click", play);
+
+      var music = document.getElementById("music");
+
+      function play() {
+        if (music.paused) {
+          music.play();
+          playOrPause.innerHTML = "PAUSE";
+          playOrPause.style.background = "brown";
+        } else {
+          music.pause();
+          playOrPause.innerHTML = "PLAY";
+          playOrPause.style.background = "green";
+        }
+      }
+
+      // BARRA DEL TIEMPO:
+      var puntos = ":";
+      var menos = "-";
+      var result = puntos.fontcolor("gray");
+      var result3 = menos.fontcolor("blue");
+
+      optionTotal = 1; // desaparecer los 3 tiempos = 0 y 1 = aparecer
+      cuentaProgresiva = 1; // desaparecer 0  y 1 = aparecer
+      cuentaTotal = 1; // desaparecer 0  y 1 = aparecer
+      cuentaRegresiva = 0; // desaparecer 0  y 1 = aparecer
+
+      var barra = "/";
+      var result2 = barra.fontcolor("red");
+
+      if (optionTotal === 1) {
+        if (cuentaTotal === 1) {
+          // CUENTA TOTAL:
+          music.addEventListener(
+            "timeupdate",
+            function() {
+              var timeleft = document.getElementById("total"),
+                duration = parseInt(music.duration),
+                currentTime = parseInt(music.currentTime),
+                timeLeft = duration,
+                s,
+                m,
+                h;
+
+              s = timeLeft % 60;
+              m = Math.floor(timeLeft / 60) % 60;
+              h = Math.floor(timeLeft / 3600) % 60;
+
+              s = s < 10 ? "0" + s : s;
+              m = m < 10 ? "0" + m : m;
+              h = h < 10 ? "0" + h : h;
+              timeleft.innerHTML = h + result + m + result + s;
+            },
+            false
+          );
+        }
+        if (cuentaRegresiva === 1) {
+          // CUENTA REGRESIVA:
+          music.addEventListener(
+            "timeupdate",
+            function() {
+              var timeleft = document.getElementById("timeleft"),
+                duration = parseInt(music.duration),
+                currentTime = parseInt(music.currentTime),
+                timeLeft = duration - currentTime,
+                s,
+                m,
+                h;
+              s = timeLeft % 60;
+              m = Math.floor(timeLeft / 60) % 60;
+              h = Math.floor(timeLeft / 60 / 60) % 60;
+
+              s = s < 10 ? "0" + s : s;
+              m = m < 10 ? "0" + m : m;
+              h = h < 10 ? "0" + h : h;
+
+              timeleft.innerHTML =
+                " " + result4 + result3 + h + result + m + result + s;
+            },
+            false
+          );
+        }
+        if (cuentaProgresiva === 1) {
+          // CUENTA PROGRESIVA:
+          music.addEventListener(
+            "timeupdate",
+            function() {
+              var timeline = document.getElementById("currentTime");
+
+              var s = parseInt(music.currentTime % 60);
+              var m = parseInt((music.currentTime / 60) % 60);
+              var h = parseInt((music.currentTime / 60 / 60) % 60);
+
+              s = s < 10 ? "0" + s : s;
+              m = m < 10 ? "0" + m : m;
+              h = h < 10 ? "0" + h : h;
+
+              timeline.innerHTML = h + result + m + result + s + " " + result2;
+            },
+            false
+          );
+        }
+      }
+
+      if (cuentaProgresiva === 1) {
+        var result2 = " ";
+      } else {
+        var barra = "/";
+        var result2 = barra.fontcolor("red");
+      }
+      if (cuentaRegresiva === 1) {
+        var barra = "/";
+        var result2 = barra.fontcolor("red");
+      } else {
+        //  var result2 = "";
+        var barra = "/";
+        var result2 = barra.fontcolor("red");
+      }
+
+      if (cuentaTotal === 1) {
+        var barra2 = "/";
+        var result4 = barra.fontcolor("red");
+      } else {
+        var result4 = " ";
+      }
+
+      var duration = music.duration;
+
+
+// Barra de volumen:
+      var barrita = document.getElementById("barrita");
+      var text = document.getElementById("text");
+      var guion = "--"
+      var guiones = guion.fontcolor("black")
+      var signo3 = "%";
+      var signo4 = signo3.fontcolor("yellow");
+     
+      barrita.oninput = function() {
+        text.innerHTML = this.value + guiones + signo4;
+      };
+
+
+      var e = document.querySelector(".contenedor");
+      var eInner = document.querySelector(".barrita");
+      var audio = document.querySelector("audio");
+
+      window.SetVolume = function(val){
+    console.log('Before: ' + audio.volume);
+    audio.volume = val / 100;
+    console.log('After: ' + audio.volume);
+  }
+     
+
+
+ // BARRA DEL TRANSCURSO DEL TIEMPO DE LA MUSICA:
+      var playhead = document.getElementById("sliderContainer"); // playhead
+      var timeline = document.getElementById("myRange"); // timeline
+      
+
+      var slider = document.getElementById("myRange");
+      var output = document.getElementById("demo");
+      var signo = " %";
+      var signo2 = signo.fontcolor("yellow");
+
+      slider.oninput = function() {
+        output.innerHTML = this.value + guiones + signo2;
+      };
+
+      // timeline width adjusted for playhead
+      var timelineWidth = timeline.offsetWidth - playhead.offsetHeight;
+      console.log(timelineWidth)
+      // play button event listenter
+      playOrPause.addEventListener("click", play);
+
+      // timeupdate event listener
+      music.addEventListener("timeupdate", timeUpdate, false);
+
+      // makes timeline clickable
+      timeline.addEventListener(
+        "click",
+        function(event) {
+          moveplayhead(event);
+          music.currentTime = duration * clickPercent(event);
+        },
+        false
+      );
+
+      // returns click as decimal (.77) of the total timelineWidth
+      function clickPercent(event) {
+        return (event.clientX - getPosition(timeline)) / timelineWidth;
+      }
+
+      // makes playhead draggable
+      playhead.addEventListener("mousedown", mouseDown, false);
+      window.addEventListener("mouseup", mouseUp, false);
+
+      // Boolean value so that audio position is updated only when the playhead is released
+      var onplayhead = false;
+      // mouseDown EventListener
+      function mouseDown() {
+        onplayhead = true;
+        window.addEventListener("mousemove", moveplayhead, true);
+        music.removeEventListener("timeupdate", timeUpdate, false);
+      }
+      // mouseUp EventListener
+      // getting input from all mouse clicks
+      function mouseUp(event) {
+        if (onplayhead == true) {
+          moveplayhead(event);
+          window.removeEventListener("mousemove", moveplayhead, true);
+          // change current time
+          music.currentTime = duration * clickPercent(event);
+          music.addEventListener("timeupdate", timeUpdate, false);
+        }
+        onplayhead = false;
+      }
+
+      // mousemove EventListener
+      // Moves playhead as user drags
+      function moveplayhead(event) {
+        var newMargLeft = event.clientX - getPosition(timeline);
+
+       
+        if (newMargLeft >= 0 && newMargLeft <= timelineWidth) {
+          playhead.style.marginLeft = newMargLeft + "px";
+        }
+        if (newMargLeft < 0) {
+          playhead.style.marginLeft = "0px";
+        }
+        if (newMargLeft > timelineWidth) {
+          playhead.style.marginLeft = timelineWidth + "px";
+        }
+      }
+
+      // timeUpdate
+      // Synchronizes playhead position with current point in audio
+      function timeUpdate() {
+        var playPercent = timelineWidth * (music.currentTime / duration);
+        playhead.style.marginLeft = playPercent + "px";
+        if (music.currentTime == duration) {
+          pButton.className = "";
+          pButton.className = "play";
+        }
+      }
+
+      // Gets audio file duration
+      music.addEventListener(
+        "canplaythrough",
+        function() {
+          duration = music.duration;
+        },
+        false
+      );
+
+      // getPosition
+      // Returns elements left position relative to top-left of viewport
+      function getPosition(el) {
+        return el.getBoundingClientRect().left;
+      }
+    </script>
+  </body>
+</html>
