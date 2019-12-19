@@ -42,7 +42,7 @@
         margin-top: 20px;
       }
       .title {
-        margin-top: 70px;
+        margin-top: 30px;
         text-align: center;
         font-family: "001";
       }
@@ -103,7 +103,7 @@
         width: 135px;
         height: 50px;
         left: 63%;
-        top: 42%;
+        top: 37%;
         transform: rotate(-90deg);
         -webkit-transform: rotate(-90deg);
         -moz-transform: rotate(-90deg);
@@ -143,7 +143,7 @@
         justify-content: center;
         align-items: center;
         left: 75%;
-        top: 63%;
+        top: 58.4%;
         font-family: "001";
       }
 
@@ -151,7 +151,7 @@
         position: absolute;
         width: 135px;
         height: 50px;
-        top: 42%;
+        top: 37%;
         transform: rotate(-90deg);
         -webkit-transform: rotate(-90deg);
         -moz-transform: rotate(-90deg);
@@ -193,7 +193,7 @@
         align-items: center;
         position: absolute;
         left: 12%;
-        top: 63%;
+        top: 58.4%;
         font-family: "002";
       }
     </style>
@@ -220,7 +220,7 @@
             type="range"
             min="0"
             max="100"
-            value="50"
+            value="0"
             class="slider2"
             id="myRange"
           />
@@ -232,10 +232,11 @@
             type="range"
             min="0"
             max="100"
-            value="50"
+            value="100"
             class="barrita"
             id="barrita"
-            oninput="SetVolume(this.value)" onchange="SetVolume(this.value)"
+            oninput="SetVolume(this.value)"
+            onchange="SetVolume(this.value)"
           />
         </div>
         <p id="text"></p>
@@ -280,6 +281,22 @@
 
       var music = document.getElementById("music");
 
+      var slider = document.getElementById("myRange"); // timeline  = CUADRO ROJO
+
+      var output = document.getElementById("demo");
+      var signo = " %";
+      var signo2 = signo.fontcolor("yellow");
+
+      let interval;
+      let sliderInUse = false;
+
+      var copyElpasedTimeToSlider = _ => {
+        var slider = document.getElementById("myRange");
+        slider.value = (music.currentTime * 100) / music.duration;
+
+        output.innerHTML = slider.value + guiones + signo2;
+      };
+
       function play() {
         if (music.paused) {
           music.play();
@@ -291,6 +308,13 @@
           playOrPause.style.background = "green";
         }
       }
+      music.addEventListener("ended", function(){
+    this.currentTime = 0;
+    this.pause();
+    playOrPause.innerHTML = "PLAY";
+          playOrPause.style.background = "green";
+});
+
 
       // BARRA DEL TIEMPO:
       var puntos = ":";
@@ -328,6 +352,10 @@
               m = m < 10 ? "0" + m : m;
               h = h < 10 ? "0" + h : h;
               timeleft.innerHTML = h + result + m + result + s;
+
+              if (!sliderInUse) {
+                copyElpasedTimeToSlider();
+              }
             },
             false
           );
@@ -404,137 +432,47 @@
 
       var duration = music.duration;
 
-
-// Barra de volumen:
+      // Barra de volumen:
       var barrita = document.getElementById("barrita");
       var text = document.getElementById("text");
-      var guion = "--"
-      var guiones = guion.fontcolor("black")
+      var guion = "--";
+      var guiones = guion.fontcolor("black");
       var signo3 = "%";
       var signo4 = signo3.fontcolor("yellow");
-     
+
       barrita.oninput = function() {
         text.innerHTML = this.value + guiones + signo4;
       };
 
+      function myFunction () {
+        text.innerHTML = barrita.value + guiones + signo4;
+      }
+      myFunction();
 
       var e = document.querySelector(".contenedor");
       var eInner = document.querySelector(".barrita");
       var audio = document.querySelector("audio");
 
-      window.SetVolume = function(val){
-    console.log('Before: ' + audio.volume);
-    audio.volume = val / 100;
-    console.log('After: ' + audio.volume);
-  }
-     
+      window.SetVolume = function(val) {
+        console.log("Before: " + audio.volume);
+        audio.volume = val / 100;
+        console.log("After: " + audio.volume);
+      };
 
-
- // BARRA DEL TRANSCURSO DEL TIEMPO DE LA MUSICA:
-      var playhead = document.getElementById("sliderContainer"); // playhead
-      var timeline = document.getElementById("myRange"); // timeline
-      
-
-      var slider = document.getElementById("myRange");
-      var output = document.getElementById("demo");
-      var signo = " %";
-      var signo2 = signo.fontcolor("yellow");
+      // BARRA DEL TRANSCURSO DEL TIEMPO DE LA MUSICA:
+      var playhead = document.getElementById("sliderContainer"); // playhead = CCONTENEDOR AZUL
 
       slider.oninput = function() {
+        sliderInUse = true;
+        valor = this.value;
+        music.currentTime = (this.value * music.duration) / 100;
+
         output.innerHTML = this.value + guiones + signo2;
       };
 
-      // timeline width adjusted for playhead
-      var timelineWidth = timeline.offsetWidth - playhead.offsetHeight;
-      console.log(timelineWidth)
-      // play button event listenter
-      playOrPause.addEventListener("click", play);
-
-      // timeupdate event listener
-      music.addEventListener("timeupdate", timeUpdate, false);
-
-      // makes timeline clickable
-      timeline.addEventListener(
-        "click",
-        function(event) {
-          moveplayhead(event);
-          music.currentTime = duration * clickPercent(event);
-        },
-        false
-      );
-
-      // returns click as decimal (.77) of the total timelineWidth
-      function clickPercent(event) {
-        return (event.clientX - getPosition(timeline)) / timelineWidth;
-      }
-
-      // makes playhead draggable
-      playhead.addEventListener("mousedown", mouseDown, false);
-      window.addEventListener("mouseup", mouseUp, false);
-
-      // Boolean value so that audio position is updated only when the playhead is released
-      var onplayhead = false;
-      // mouseDown EventListener
-      function mouseDown() {
-        onplayhead = true;
-        window.addEventListener("mousemove", moveplayhead, true);
-        music.removeEventListener("timeupdate", timeUpdate, false);
-      }
-      // mouseUp EventListener
-      // getting input from all mouse clicks
-      function mouseUp(event) {
-        if (onplayhead == true) {
-          moveplayhead(event);
-          window.removeEventListener("mousemove", moveplayhead, true);
-          // change current time
-          music.currentTime = duration * clickPercent(event);
-          music.addEventListener("timeupdate", timeUpdate, false);
-        }
-        onplayhead = false;
-      }
-
-      // mousemove EventListener
-      // Moves playhead as user drags
-      function moveplayhead(event) {
-        var newMargLeft = event.clientX - getPosition(timeline);
-
-       
-        if (newMargLeft >= 0 && newMargLeft <= timelineWidth) {
-          playhead.style.marginLeft = newMargLeft + "px";
-        }
-        if (newMargLeft < 0) {
-          playhead.style.marginLeft = "0px";
-        }
-        if (newMargLeft > timelineWidth) {
-          playhead.style.marginLeft = timelineWidth + "px";
-        }
-      }
-
-      // timeUpdate
-      // Synchronizes playhead position with current point in audio
-      function timeUpdate() {
-        var playPercent = timelineWidth * (music.currentTime / duration);
-        playhead.style.marginLeft = playPercent + "px";
-        if (music.currentTime == duration) {
-          pButton.className = "";
-          pButton.className = "play";
-        }
-      }
-
-      // Gets audio file duration
-      music.addEventListener(
-        "canplaythrough",
-        function() {
-          duration = music.duration;
-        },
-        false
-      );
-
-      // getPosition
-      // Returns elements left position relative to top-left of viewport
-      function getPosition(el) {
-        return el.getBoundingClientRect().left;
-      }
+      slider.onmouseup = function() {
+        sliderInUse = false;
+      };
     </script>
   </body>
 </html>
